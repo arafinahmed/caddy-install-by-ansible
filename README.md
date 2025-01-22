@@ -16,4 +16,4 @@ This Ansible playbook installs Sonatype Nexus using Docker on a specified VM and
 3. **Run the playbook**:
 
    ```bash
-   ansible-playbook -i hosts.yml install_nexus.yml
+   ansible-playbook -i hosts.yml install_caddy.yml
