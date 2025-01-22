@@ -1,6 +1,6 @@
-# Sonatype Nexus Installation Playbook
+# Caddy Installation Playbook
 
-This Ansible playbook installs Sonatype Nexus using Docker on a specified VM and configures it to use an external volume for persistent data storage.
+This Ansible playbook installs caddy using Docker on a specified VM.
 
 ## Prerequisites
 
