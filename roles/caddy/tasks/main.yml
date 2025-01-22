@@ -1,0 +1,85 @@
+---
+- name: Install Docker if not present
+  apt:
+    name: docker.io
+    state: present
+  become: yes
+
+- name: Install Docker Compose if not present
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64"
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+  become: yes
+
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+  become: yes
+
+- name: Stop Caddy service if running
+  command: docker-compose down
+  args:
+    chdir: /home/ubuntu/caddy
+  ignore_errors: yes
+
+- name: Remove any orphaned containers
+  command: docker-compose down --remove-orphans
+  args:
+    chdir: /home/ubuntu/caddy
+  ignore_errors: yes
+
+- name: Remove unused Docker networks
+  command: docker network prune -f
+  ignore_errors: yes
+
+- name: Check if the Docker network exists
+  command: docker network inspect app_network
+  ignore_errors: yes
+  register: network_check
+
+- name: Debug network check result
+  debug:
+    var: network_check
+
+- name: Create Docker network if it does not exist
+  command: docker network create app_network
+  when: network_check.rc != 0
+
+- name: Create directory for Caddy service
+  file:
+    path: /home/ubuntu/caddy
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Create the caddy-config directory inside the caddy folder
+  file:
+    path: /home/ubuntu/caddy/caddy-config
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Ensure the Caddyfile exists inside caddy-config
+  template:
+    src: templates/Caddyfile.j2 
+    dest: /home/ubuntu/caddy/caddy-config/Caddyfile
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
+- name: Deploy Caddy service using Docker Compose
+  template:
+    src: templates/docker-compose-caddy.yml.j2
+    dest: /home/ubuntu/caddy/docker-compose.yml
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
+- name: Start Caddy service
+  command: docker-compose up -d
+  args:
+    chdir: /home/ubuntu/caddy

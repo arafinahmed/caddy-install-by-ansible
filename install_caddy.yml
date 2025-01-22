@@ -1,0 +1,5 @@
+---
+- hosts: caddy_vm
+  become: yes
+  roles:
+    - caddy

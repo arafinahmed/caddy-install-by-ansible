@@ -1,0 +1,18 @@
+version: '3'
+services:
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /home/ubuntu/caddy/caddy-config/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /home/ubuntu/caddy/caddy-config/caddy_data:/data
+    networks:
+      - app_network
+    restart: unless-stopped
+
+networks:
+  app_network:
+    external: true
